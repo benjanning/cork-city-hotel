@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Meta tags ensuring proper rendering and touch zooming -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- The title of the confirmation page -->
+  <title>Confirmation</title>
+
+  <!-- Bootstrap CSS for styling and custom CSS -->
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <!-- Include the navigation bar -->
+  <%- include('navbar') %>
+
+  <!-- Main container for the confirmation details -->
+  <div class="container">
+
+    <!-- Heading for the confirmation page -->
+    <h1>Confirmation</h1>
+
+    <!-- Details of the booking -->
+    <!-- Check-in date -->
+    <p>Check-in: <%= bookingData.checkin %></p>
+
+    <!-- Check-out date -->
+    <p>Check-out: <%= bookingData.checkout %></p>
+
+    <!-- Room name -->
+    <p>Room: <%= roomData.roomName %></p>
+
+    <!-- Room quantity -->
+    <p>Quantity: <%= roomData.quantity %></p>
+
+    <!-- Total cost -->
+    <p>Total Price: €<%= roomData.totalCost.toFixed(2) %></p>
+  </div>
+
+  <!-- Including required JS libraries -->
+  
+  
+  
+  
+</body>
+</html>

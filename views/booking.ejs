@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Metadata for the HTML document -->
+  <meta charset="UTF-8">
+  <!-- Metadata to ensure proper rendering and touch zooming in mobile devices -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Page title that appears in the browser tab -->
+  <title>Booking - Cork City Hotel</title>
+  <!-- Link to the Bootstrap CSS library for styling -->
+  
+  <!-- Link to the external CSS file for additional styles -->
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <!-- Navbar included from another file -->
+  <%- include('navbar') %>
+
+  <div class="container">
+    <!-- Page title -->
+    <h1>Booking</h1>
+
+    <!-- Form for booking submission -->
+    <form action="/booking" method="post">
+      <!-- Check-in date input -->
+      <div class="form-group">
+        <label for="checkin">Check-in:</label>
+        <input type="date" class="form-control" id="checkin" name="checkin" required>
+      </div>
+      <!-- Check-out date input -->
+      <div class="form-group">
+        <label for="checkout">Check-out:</label>
+        <input type="date" class="form-control" id="checkout" name="checkout" required>
+      </div>
+      <!-- Name input -->
+      <div class="form-group">
+        <label for="name">Name:</label>
+        <input type="text" class="form-control" id="name" name="name" required>
+      </div>
+      <!-- Email input -->
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" class="form-control" id="email" name="email" required>
+      </div>
+      <!-- Submit button -->
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+  </div>
+
+  <!-- jQuery library -->
+  
+  <!-- Bootstrap JS library -->
+  
+</body>
+
+</html>

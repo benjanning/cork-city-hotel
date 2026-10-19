@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Metadata for the page -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Page title -->
+  <title>Welcome to Cork City Hotel</title>
+
+  <!-- Linking Bootstrap CSS for styling -->
+  
+
+  <!-- Linking custom CSS for additional styling -->
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <!-- Including Navbar -->
+  <%- include('navbar') %>
+
+  <!-- Main container of the page -->
+  <div class="container">
+    <!-- Main Heading of the page -->
+    <h1><center>Welcome to Cork City Hotel</center></h1>
+
+    <!-- Introduction text for the hotel -->
+    <p>At Cork City Hotel, we combine the charm of a bygone era with modern elegance and world-class service. Our idyllic location in the heart of Cork City allows guests to immerse themselves in the vibrant local culture while enjoying luxurious amenities and unparalleled hospitality. Whether you're visiting for business or pleasure, Cork City Hotel promises a memorable stay that exceeds your every expectation.</p>
+
+    <!-- Centered button that redirects to "What's on in Cork" when clicked -->
+    <center>
+      <button style="background-color: #FF0000; color: #FFFFFF; padding: 10px 20px; margin: 20px 0; border: none; cursor: pointer;" onclick="window.location.href='https://www.purecork.ie/whats-on'">What's on in Cork</button>
+    </center>
+
+<p class="notice">Local educational demonstration. No real reservations or payments.</p>
+    <a class="btn" href="/booking">Explore the booking flow</a>
+  </div></body></html>

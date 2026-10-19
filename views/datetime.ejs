@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Meta tags ensuring proper rendering and touch zooming -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- The title of the page -->
+  <title>Date and Time</title>
+
+  <!-- Bootstrap CSS for styling -->
+  
+</head>
+
+<body>
+  <!-- Include the navigation bar -->
+  <%- include('navbar') %>
+
+  <!-- Main container for the date and time information -->
+  <div class="container">
+
+    <!-- Heading for the page -->
+    <h1>Date and Time</h1>
+
+    <!-- Display the current date and time -->
+    <p>Current date and time: <%= dateTime %></p>
+
+    <!-- Heading for the weather information -->
+    <h2>Weather in <%= weather.city %></h2>
+
+    <!-- Display the weather information -->
+    <p>Description: <%= weather.description %></p>
+    <p>Temperature: <%= weather.temperature %> °C</p>
+    <p>Feels like: <%= weather.feels_like %> °C</p>
+    <p>Humidity: <%= weather.humidity %> %</p>
+    <p>Wind speed: <%= weather.wind_speed %> m/s</p>
+
+  </div>
+
+  <!-- Including required JS libraries -->
+  
+  
+  
+</body>
+
+</html>

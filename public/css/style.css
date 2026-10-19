@@ -1,0 +1,72 @@
+/* General styles for the body of the website */
+body {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f0f2f5;
+}
+
+/* Styling for the main container on the page */
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1rem;
+  background-color: #ffffff;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+}
+
+/* Styling for H1 headers */
+h1 {
+  margin-bottom: 1rem;
+  color: #4a4e69;
+  font-weight: bold;
+}
+
+/* Styling for paragraphs */
+p {
+  font-size: 18px;
+  line-height: 1.6;
+  color: #4a4e69;
+}
+
+/* Adjusting the height and object-fit property of images */
+.img-size {
+  height: 400px;
+  object-fit: cover;
+}
+
+/* Navbar styles start here */
+.navbar {
+  background-color: #f8f9fa;
+}
+
+/* Styling for items in the navbar */
+.navbar .nav-item {
+  list-style-type: none;
+  display: inline-block;
+  margin-right: 10px;
+}
+
+/* Styling for links in the navbar items */
+.navbar .nav-item a {
+  display: inline-block;
+  padding: 10px 15px;
+  background-color: #FF0000; /* Changed this to match the color of "What's on in Cork" button */
+  color: #fff;
+  text-decoration: none;
+  border-radius: 5px;
+}
+
+/* Hover effect for links in the navbar */
+.navbar .nav-item a:hover {
+  background-color: #cc0000; /* Adjusted this to a darker shade of red for the hover effect */
+}
+
+/* Offline demonstration layout; original EJS booking screens retained. */
+body{font-family:Arial,sans-serif;color:#233a3c;background:#f4f7f6;margin:0;line-height:1.6}
+.container{max-width:900px;margin:40px auto;background:white;padding:36px;border:1px solid #dce6e3;border-radius:8px}
+nav{background:#183d3d;padding:22px;color:white}nav a{color:white;margin-right:22px}.navbar-toggler{display:none}
+.navbar-nav{display:flex;gap:18px;list-style:none;padding:0}input,select{display:block;box-sizing:border-box;width:100%;padding:12px;border:1px solid #b4c8c3;border-radius:4px;margin:6px 0 20px}
+button,.btn{display:inline-block;background:#185e50;color:white;border:0;border-radius:4px;padding:12px 22px;font-size:16px;text-decoration:none}.notice{padding:14px;background:#e4f3ea}
+@media(max-width:600px){.container{margin:16px;padding:22px}.navbar-nav{flex-wrap:wrap}}

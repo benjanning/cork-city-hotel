@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Select Room - Cork City Hotel</title>
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('navbar') %>
+
+<!-- Form for selecting a room. Hidden fields for check-in and check-out dates, a dropdown for room selection populated with data from the server, and an onchange event listener to update the price based on the selected room. -->
+
+  <div class="container">
+    <h1>Select Room</h1>
+    <form action="/select-room" method="post">
+      <input type="hidden" id="checkInDate" name="checkInDate" value="<%= bookingData.checkIn %>">
+      <input type="hidden" id="checkOutDate" name="checkOutDate" value="<%= bookingData.checkOut %>">
+      <div class="form-group">
+        <label for="room">Room:</label>
+        <select class="form-control" id="room" name="room" onchange="updatePrice()">
+          <% rooms.forEach((room) => { %>
+            <option value="<%= room.id %>" data-price="<%= room.price %>"><%= room.name %> - €<%= room.price %></option>
+          <% }); %>
+        </select>
+      </div>
+      <br>
+	  
+	  <!-- Allows users to select the quantity of rooms desired with a minimum value of 1. An event listener updates the price when the quantity is changed. Displays the number of nights, which is read-only because it is calculated based on the check-in and check-out dates. -->
+	  
+      <div class="form-group">
+        <label for="quantity">Quantity:</label>
+        <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="1" onchange="updatePrice()">
+      </div>
+      <br>
+      <label for="nights">Number of Nights:</label>
+      <input type="text" class="form-control" id="nights" readonly>
+      <br>
+      <br>
+	  
+	  <!-- Select Payment Type -->
+	  
+      <label for="payment">Payment Method:</label>
+      <select class="form-control" id="payment" name="payment">
+        <option value="demo">Demo only — no payment collected</option>
+        
+        
+      </select>
+	  
+      <br>
+      <br>
+	  
+	  <!-- Button for Submitting Calculating Total Price and Confirming Payment -->
+	  
+      <button type="button" class="btn btn-primary" id="calculateTotal" onclick="calculateAndDisplayTotal()">Calculate Total</button>
+      <br>
+      <input type="text" class="form-control" id="totalPrice" readonly>
+      <br>
+      <br>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    <br>
+	
+	
+    <!-- Image placeholder -->
+    
+  </div>
+
+   <!-- This script defines the function 'updatePrice' which is responsible for dynamically updating the price and room image on the page based on user selection.
+     The function:
+     - Retrieves the selected room's price and the desired quantity from the form.
+     - Calculates the number of nights based on the chosen check-in and check-out dates.
+     - Updates the 'Number of Nights' field with the calculated value.
+     - Determines the room type based on the selected room's name.
+     - Updates the room image source to match the selected room type. -->
+
+  <script>
+    function updatePrice() {
+      const roomPrice = parseFloat(document.querySelector('#room option:checked').dataset.price);
+      const quantity = parseInt(document.querySelector('#quantity').value);
+      const checkInDate = new Date('<%= bookingData.checkIn %>');
+      const checkOutDate = new Date('<%= bookingData.checkOut %>');
+            const numberOfNights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+
+      document.querySelector('#nights').value = numberOfNights;
+	  
+	  <!-- Select Room Image -->
+
+      const roomType = document.querySelector('#room option:checked').textContent.split(' ')[0].toLowerCase();
+      
+    }
+
+    <!-- Calculate the total price based on the selected room price, quantity, and the number of nights. Display this total price in the 'totalPrice' field. The 'updatePrice' function is also called immediately after the function definition. -->
+
+    function calculateAndDisplayTotal() {
+      const roomPrice = parseFloat(document.querySelector('#room option:checked').dataset.price);
+      const quantity = parseInt(document.querySelector('#quantity').value);
+      const numberOfNights = parseInt(document.querySelector('#nights').value);
+      
+      document.querySelector('#totalPrice').value = 'Total Price: €' + (roomPrice * quantity * numberOfNights);
+    }
+
+    updatePrice();
+  </script>
+
+  <!-- Including required JS libraries -->
+  
+  
+  
+  
+</body>
+</html>
+

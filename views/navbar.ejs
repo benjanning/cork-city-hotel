@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<!-- The navigation bar, uses Bootstrap classes -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <!-- Container to center the content within the navbar -->
+  <div class="container">
+    <!-- The brand name, links to the homepage -->
+    <a class="navbar-brand" href="/">Cork City Hotel</a>
+    
+    <!-- Button that toggles the navbar in smaller screens, it shows/hides the links -->
+    <!-- The 'data-bs-*' attributes are for Bootstrap's built-in JavaScript -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <!-- The icon that indicates the navbar can be expanded -->
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <!-- The collapsible content -->
+    <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+      <!-- Unordered list for the nav items -->
+      <ul class="navbar-nav">
+        <!-- Individual nav items -->
+        <li class="nav-item">
+          <!-- Link to the homepage -->
+          <a class="nav-link" href="/">Home</a>
+        </li>
+        <li class="nav-item">
+          <!-- Link to the booking page -->
+          <a class="nav-link" href="/booking">Booking</a>
+        </li>
+        <li class="nav-item">
+          <!-- Link to the weather and local time page -->
+          <a class="nav-link" href="/datetime">Weather/Local Time</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>

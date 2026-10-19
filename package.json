@@ -1,0 +1,15 @@
+{
+  "name": "cork-city-hotel",
+  "version": "1.1.0",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "ejs": "^3.1.10",
+    "express-session": "^1.18.1",
+    "mysql": "^2.18.1"
+  }
+}
