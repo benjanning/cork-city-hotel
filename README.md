@@ -1,19 +1,65 @@
-# Cork City Hotel booking prototype
+# Cork City Hotel
 
-An educational Express/EJS booking flow: choose dates, select a room and review a calculated total. Adapted from my original college project, with a local demonstration that needs no database, external API, account or payment details.
+A complete demonstration booking journey: choose dates, compare example rooms, enter sample guest details and review an accurate total.
 
-## Run locally
+![Actual Express application homepage](assets/homepage.jpg)
 
-Install Node.js, run `npm ci`, then `npm start`. Open http://127.0.0.1:3000. Use synthetic names and an example.com address. All session data expires; nothing is booked or charged. Run `npm test` for date and pricing tests.
+**Node.js · Express · EJS · JavaScript · Optional MySQL**
 
-## Changes from the coursework
+**[Try the interactive demo →](https://benjanning.github.io/cork-city-hotel/)** · [Visual case study](https://benjanning.github.io/projects/projects/hotel-booking/) · [Portfolio](https://benjanning.github.io/projects/)
 
-Preserved the EJS booking, room selection and confirmation screens. Added chronological date validation, quantity limits, server-calculated totals and guards for missing session state. The local demonstration uses three synthetic room records. Optional MySQL mode reads the original `products` schema using DB_HOST, DB_USER, DB_PASSWORD and DB_NAME; it has not been integration-tested here.
+The public demo is static and runs in your browser. It shares the interface and booking rules with the Express application; it does not run Express or MySQL. Everything uses synthetic data. No actual reservation or payment is made.
 
-Removed embedded weather credentials, personal SQL exports and hotel photography with unverified redistribution rights. Removed broken CDN references; added local layout rules. The old demonstration password check was replaced with an explicit demo continuation; this is not an authentication system. Payment options are labelled demonstration only.
+## What it does
 
-## Scope
+- Dates → room and quantity → sample guest details → review → confirmation.
+- Validates dates, guest capacity, quantity and example availability.
+- Computes totals in cents; the server independently recalculates submitted selections.
+- Preserves guest details and supports editing, retries and idempotent confirmation.
+- Handles missing steps, expired sessions and catalog failures with clear messages.
 
-Academic prototype. No real hotel affiliation, availability management, payment integration or production authentication is claimed. Do not expose this development server to the internet.
+## Run the Express application
 
-[Case study](https://benjanning.github.io/projects/projects/hotel-booking/) · [Portfolio](https://benjanning.github.io/projects/)
+Requires Node.js 18+.
+
+```bash
+npm ci
+npm test
+npm start
+```
+
+Open http://127.0.0.1:3000. Use sample names and an @example.com address. The default needs no database. The server binds to loopback and uses temporary sessions.
+
+## Screens from the working application
+
+| Room selection | Guest details |
+| --- | --- |
+| ![Example room cards](assets/rooms.jpg) | ![Sample guest form and accurate total](assets/guest-form.jpg) |
+| Review | Confirmation |
+| ![Review](assets/review.jpg) | ![Demonstration confirmation](assets/confirmation.jpg) |
+
+## Architecture
+
+The EJS shell, CSS, browser journey and pure booking rules are shared by both modes. Express provides room, preview and confirmation endpoints; the public static adapter runs those rules locally. The backend validates from its catalog, uses CSRF-protected session requests and never trusts a client-supplied price. No real inventory is allocated.
+
+`npm run build:demo` renders docs/ from the same EJS shell and copies its assets. GitHub Pages serves docs/. Do not edit generated docs/ directly.
+
+## Optional isolated MySQL catalog
+
+Docker/MySQL was unavailable in the development environment, so the live integration test is **not verified**. A reproducible opt-in setup is included:
+
+1. Copy .env.example to .env and choose disposable local passwords.
+2. Run `docker compose up -d --wait`. It creates an isolated MySQL 8.4 container with three synthetic rooms, loopback port 3307 and temporary database storage.
+3. Set MYSQL_MODE=1, DB_HOST=127.0.0.1, DB_PORT=3307, DB_NAME=hotel_demo, DB_USER=hotel_demo and DB_PASSWORD to the local demo password, then run npm start.
+4. Set RUN_MYSQL_TESTS=1 with the same DB_* variables and run npm test.
+5. `docker compose down` stops the disposable demo. Its temporary database is not intended to preserve records.
+
+There is no dependency on Docker to run the default application. No production database or public database port is configured.
+
+## Verification and limits
+
+15 automated tests pass, with the opt-in live MySQL test skipped. Tests exercise full HTTP preview/confirmation, CSRF, tampered prices, invalid dates/quantities/capacity/guests, idempotency, changed rates and catalog failures. Browser checks cover the complete Express and static journeys on desktop/mobile.
+
+Academic source evolved into a portfolio demo: original booking templates are preserved in views/legacy/ and Git history. This is not a real hotel, payment system, inventory engine or production authentication service. Use synthetic details only.
+
+[Image/demo credits](public/credits.html) · [Screenshot provenance](assets/PROVENANCE.md) · [Historical V1 documentation](COURSEWORK.md)
