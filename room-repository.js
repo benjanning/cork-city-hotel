@@ -8,7 +8,7 @@ function createRoomRepository(env = process.env) {
     };
   if (!env.DB_USER || !env.DB_PASSWORD || !env.DB_NAME)
     throw Error("MySQL mode requires DB_USER, DB_PASSWORD and DB_NAME.");
-  const pool = require("mysql").createPool({
+  const pool = require("mysql2").createPool({
     host: env.DB_HOST || "127.0.0.1",
     port: Number(env.DB_PORT || 3306),
     user: env.DB_USER,
