@@ -2,7 +2,7 @@
 
 A complete demonstration booking journey: choose dates, compare example rooms, enter sample guest details and review an accurate total.
 
-![Actual Express application homepage](assets/homepage.jpg)
+![Verified shared demonstration homepage](https://raw.githubusercontent.com/benjanning/cork-city-hotel/portfolio-published/portfolio/export/assets/homepage.jpg)
 
 **Node.js · Express · EJS · JavaScript · Optional MySQL**
 
@@ -46,7 +46,7 @@ The EJS shell, CSS, browser journey and pure booking rules are shared by both mo
 
 ## Optional isolated MySQL catalog
 
-Docker/MySQL was unavailable in the development environment, so the live integration test is **not verified**. A reproducible opt-in setup is included:
+The source release checks this catalog against a fresh MySQL 8.4 service in CI. For an optional local disposable setup:
 
 1. Copy .env.example to .env and choose disposable local passwords.
 2. Run `docker compose up -d --wait`. It creates an isolated MySQL 8.4 container with three synthetic rooms, loopback port 3307 and temporary database storage.
@@ -58,8 +58,12 @@ There is no dependency on Docker to run the default application. No production d
 
 ## Verification and limits
 
-15 automated tests pass, with the opt-in live MySQL test skipped. Tests exercise full HTTP preview/confirmation, CSRF, tampered prices, invalid dates/quantities/capacity/guests, idempotency, changed rates and catalog failures. Browser checks cover the complete Express and static journeys on desktop/mobile.
+Source CI requires 15 backend/rule checks, a separate disposable MySQL 8.4 integration check and two complete browser workflows before publishing a release. The default local run skips the opt-in database check. Tests exercise full HTTP preview/confirmation, CSRF, tampered prices, invalid dates/quantities/capacity/guests, idempotency, changed rates and catalog failures. Browser checks cover the complete Express and static journeys on desktop/mobile.
 
 Academic source evolved into a portfolio demo: original booking templates are preserved in views/legacy/ and Git history. This is not a real hotel, payment system, inventory engine or production authentication service. Use synthetic details only.
 
 [Image/demo credits](public/credits.html) · [Screenshot provenance](assets/PROVENANCE.md) · [Historical V1 documentation](COURSEWORK.md)
+
+## Verified visual publishing
+
+`npm run test:browser` starts isolated Express and static servers, checks the complete journey, invalid dates and sample email, confirmation reload, reset and mobile fit. Capture dates are calculated thirty days ahead to keep the scheduled checks usable. The MySQL check uses the explicitly named disposable CI database only. `scripts/seed-ci.cjs` refuses other names. The source release workflow exports fresh screenshot hashes and source identity only after all checks pass. The central site imports that package through a review PR and deploys after merge.

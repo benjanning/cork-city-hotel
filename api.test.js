@@ -29,7 +29,11 @@ async function client(repository) {
   }
   const session = await request("session");
   csrf = session.data.csrf;
-  return { request, close: () => new Promise((r) => server.close(r)) };
+  return { request, close: () => new Promise((r) => {
+    server.close(r);
+    // Test clients are finished; close fetch keep-alive sockets deterministically.
+    server.closeAllConnections();
+  }) };
 }
 const selection = {
   checkin: "2026-11-10",
