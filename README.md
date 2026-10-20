@@ -46,7 +46,7 @@ The EJS shell, CSS, browser journey and pure booking rules are shared by both mo
 
 ## Optional isolated MySQL catalog
 
-Docker/MySQL was unavailable in the development environment, so the live integration test is **not verified**. A reproducible opt-in setup is included:
+The source release checks this catalog against a fresh MySQL 8.4 service in CI. For an optional local disposable setup:
 
 1. Copy .env.example to .env and choose disposable local passwords.
 2. Run `docker compose up -d --wait`. It creates an isolated MySQL 8.4 container with three synthetic rooms, loopback port 3307 and temporary database storage.
