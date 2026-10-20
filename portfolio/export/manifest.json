@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "source_repository": "benjanning/cork-city-hotel",
+  "source_revision": "4214b29b3e705cf9da130fd305e9d29dd5d7cf46",
+  "verification_run": 39431496033,
+  "project": {
+    "slug": "hotel-booking",
+    "title": "Hotel booking prototype",
+    "category": "Web application",
+    "repo": "cork-city-hotel",
+    "stack": [
+      "Node.js",
+      "Express",
+      "EJS",
+      "MySQL"
+    ],
+    "image": "homepage.jpg",
+    "alt": "Actual hotel demonstration homepage with future date selection and credited illustrative bedroom photography",
+    "desc": "A complete demonstration booking journey, from dates and room cards to guest details and confirmation.",
+    "built": "Evolved my original Express/EJS hotel coursework into a polished application with a complete booking journey and a matching browser-based public demo.",
+    "why": "A multi-step transaction should carry information reliably from one screen to the next. The project explores session state, validation and pricing across a booking journey.",
+    "how": [
+      "Choose dates and a guest count, then compare three example room types.",
+      "Select room quantity and enter synthetic guest details; review the itemised total.",
+      "Confirm the demonstration and receive a clearly labelled demo reference. No real reservation or payment is made."
+    ],
+    "demonstrates": "Server-rendered web development, session handling, input validation and turning a multi-step process into a working application.",
+    "caption": "Genuine capture of the verified shared interface. The hotel is fictional; photography is illustrative and credited. Browser-only public mode is labelled prominently.",
+    "result": "15 backend/rule regression checks, one isolated MySQL 8.4 catalog integration check and two full browser workflows passed before publication. Both Express and static journeys validate dates and sample emails, calculate two €120 rooms over three nights as €720, preserve confirmation on reload, reset and fit a 390px screen. Exact-revision evidence is linked below.",
+    "limits": "The public GitHub Pages demo runs in the browser, sharing the interface and rules with the server source. It does not run Express/MySQL. Neither mode creates real inventory, reservations, accounts or payments. MySQL integration verifies the synthetic catalog in a disposable CI database; production operations, persistence of real bookings and concurrent stock allocation are outside this prototype.",
+    "technical": "Shared EJS, JavaScript and pure booking rules power both modes. Express independently validates selections and guest details, recalculates prices, protects session writes with CSRF and handles duplicate confirmations. MySQL2 uses bounded pooled connections and supports the tested MySQL 8.4 authentication. CI starts isolated synthetic database and application servers, verifies backend and browser journeys, then exports commit-identified screenshots. Original templates remain in views/legacy and Git history.",
+    "run": "Run npm ci, npm test and npm start for Express at http://127.0.0.1:3000. No database is needed by default. npm run build:demo generates the public static version. An optional isolated MySQL Docker setup and opt-in integration test are documented separately.",
+    "extra": "",
+    "demo": "https://benjanning.github.io/cork-city-hotel/",
+    "gallery": [
+      [
+        "rooms.jpg",
+        "Three synthetic room types with quantity and capacity rules."
+      ],
+      [
+        "guest-form.jpg",
+        "Sample guest details and the calculated €720 example total."
+      ],
+      [
+        "review.jpg",
+        "A clear review before confirming a demonstration."
+      ],
+      [
+        "confirmation.jpg",
+        "Completed example journey; no real booking or payment."
+      ]
+    ]
+  },
+  "assets": [
+    {
+      "name": "homepage.jpg",
+      "sha256": "482556ede17afcc5b9409bdfcbf96e7f2aa7b12112148cd586b3eb62966993b1",
+      "bytes": 159227,
+      "provenance": "Actual shared-frontend static browser capture after successful Express/static journey, validation, reload, reset and mobile checks. Future dates calculated at capture time; synthetic records; licensed illustrative photograph credited in public/credits.html."
+    },
+    {
+      "name": "rooms.jpg",
+      "sha256": "8d2ea1fdc1ec3834f08dda0a7ce82f18c636fec1d1e933d1e642282be35417cd",
+      "bytes": 89867,
+      "provenance": "Actual shared-frontend static browser capture after successful Express/static journey, validation, reload, reset and mobile checks. Future dates calculated at capture time; synthetic records; licensed illustrative photograph credited in public/credits.html."
+    },
+    {
+      "name": "guest-form.jpg",
+      "sha256": "fe4ed899825d5c0ea80aa6ff5c57c0e569c0d5d06d2a3a8821ba125a0d293e97",
+      "bytes": 75342,
+      "provenance": "Actual shared-frontend static browser capture after successful Express/static journey, validation, reload, reset and mobile checks. Future dates calculated at capture time; synthetic records; licensed illustrative photograph credited in public/credits.html."
+    },
+    {
+      "name": "review.jpg",
+      "sha256": "756ffb005c945bbf93679a39342fcb32ed1d1bd6124e909678a2bdc32432452e",
+      "bytes": 74132,
+      "provenance": "Actual shared-frontend static browser capture after successful Express/static journey, validation, reload, reset and mobile checks. Future dates calculated at capture time; synthetic records; licensed illustrative photograph credited in public/credits.html."
+    },
+    {
+      "name": "confirmation.jpg",
+      "sha256": "11d9529d684e5a3bbe67b2e5e59d6c3fff042d6bdffd2cea09945625393a5115",
+      "bytes": 86343,
+      "provenance": "Actual shared-frontend static browser capture after successful Express/static journey, validation, reload, reset and mobile checks. Future dates calculated at capture time; synthetic records; licensed illustrative photograph credited in public/credits.html."
+    },
+    {
+      "name": "mobile-confirmation.jpg",
+      "sha256": "54d13323e8dd7c8ccb4304b3a791aea1856edaff1c8f831aa9e832f100650c51",
+      "bytes": 66655,
+      "provenance": "Actual shared-frontend static browser capture after successful Express/static journey, validation, reload, reset and mobile checks. Future dates calculated at capture time; synthetic records; licensed illustrative photograph credited in public/credits.html."
+    },
+    {
+      "name": "mobile-homepage.jpg",
+      "sha256": "7cd7fa5cee9d338b362b06bc2b5b0c2aa96efe956f9157a4b11973f596da9e7e",
+      "bytes": 74460,
+      "provenance": "Actual shared-frontend static browser capture after successful Express/static journey, validation, reload, reset and mobile checks. Future dates calculated at capture time; synthetic records; licensed illustrative photograph credited in public/credits.html."
+    }
+  ]
+}
