@@ -60,3 +60,73 @@ test("capacity, availability and fractional quantities are enforced", () => {
       R.makeQuote(R.catalog, { ...s, quantity }, "2026-10-19"),
     );
 });
+
+test("money uses exact cents and rejects coercions or unsupported precision", () => {
+  for (const price of [
+    true,
+    false,
+    null,
+    [],
+    {},
+    "1e2",
+    " 120",
+    "1.005",
+    1.005,
+    0,
+    -1,
+    Infinity,
+    1e20,
+  ])
+    assert.throws(() => R.quote(price, 2, 3));
+  assert.equal(R.priceCents("0.29"), 29);
+  assert.equal(R.quote("0.29", 2, 3), 1.74);
+  const rooms = R.catalog.map((r) =>
+    r.id === 2 ? { ...r, price: "99999999.99", stock: 10 } : r,
+  );
+  const q = R.makeQuote(
+    rooms,
+    {
+      checkin: "2030-01-01",
+      checkout: "2031-01-01",
+      guests: 6,
+      quantity: 10,
+      roomId: 2,
+    },
+    "2030-01-01",
+  );
+  assert.equal(q.totalCents, 36499999996350);
+  assert.ok(Number.isSafeInteger(q.totalCents));
+});
+test("counts reject booleans, exponent strings and ambiguous integer syntax", () => {
+  const p = {
+    checkin: "2030-01-01",
+    checkout: "2030-01-04",
+    guests: 2,
+    quantity: 2,
+    roomId: 2,
+  };
+  for (const key of ["guests", "quantity", "roomId"])
+    for (const value of [
+      true,
+      false,
+      [],
+      {},
+      null,
+      "1e0",
+      " 1",
+      "01",
+      "1.0",
+      1.5,
+    ])
+      assert.throws(() =>
+        R.makeQuote(R.catalog, { ...p, [key]: value }, "2030-01-01"),
+      );
+  assert.equal(
+    R.makeQuote(
+      R.catalog,
+      { ...p, guests: "2", quantity: "2", roomId: "2" },
+      "2030-01-01",
+    ).totalCents,
+    72000,
+  );
+});

@@ -13,40 +13,41 @@
     ],
     "image": "homepage.jpg",
     "alt": "Actual hotel demonstration homepage with future date selection and credited illustrative bedroom photography",
-    "desc": "A complete demonstration booking journey, from dates and room cards to guest details and confirmation.",
-    "built": "Evolved my original Express/EJS hotel coursework into a polished application with a complete booking journey and a matching browser-based public demo.",
+    "desc": "A polished multi-step hotel demonstration with exact pricing, stable confirmation retries and recoverable booking reviews.",
+    "built": "Preserved the established hotel interface and strengthened the shared booking rules and review lifecycle so date changes, expired sessions and repeated confirmations behave predictably.",
     "why": "A multi-step transaction should carry information reliably from one screen to the next. The project explores session state, validation and pricing across a booking journey.",
     "how": [
-      "Choose dates and a guest count, then compare three example room types.",
-      "Select room quantity and enter synthetic guest details; review the itemised total.",
-      "Confirm the demonstration and receive a clearly labelled demo reference. No real reservation or payment is made."
+      "Choose future dates, a room type and quantity; the shared rules calculate an exact integer-cent example total.",
+      "Enter sample guest details and review the quote. Changed or expired reviews are refreshed without losing the selection, and require explicit confirmation again.",
+      "Complete a demonstration confirmation, revisit it safely or edit dates and review a new quotation; no actual room is reserved."
     ],
     "demonstrates": "Server-rendered web development, session handling, input validation and turning a multi-step process into a working application.",
     "caption": "Genuine capture of the verified shared interface. The hotel is fictional; photography is illustrative and credited. Browser-only public mode is labelled prominently.",
-    "result": "15 backend/rule regression checks, one isolated MySQL 8.4 catalog integration check and two full browser workflows passed before publication. Both Express and static journeys validate dates and sample emails, calculate two €120 rooms over three nights as €720, preserve confirmation on reload, reset and fit a 390px screen. Exact-revision evidence is linked below.",
-    "limits": "The public GitHub Pages demo runs in the browser, sharing the interface and rules with the server source. It does not run Express/MySQL. Neither mode creates real inventory, reservations, accounts or payments. MySQL integration verifies the synthetic catalog in a disposable CI database; production operations, persistence of real bookings and concurrent stock allocation are outside this prototype.",
-    "technical": "Shared EJS, JavaScript and pure booking rules power both modes. Express independently validates selections and guest details, recalculates prices, protects session writes with CSRF and handles duplicate confirmations. MySQL2 uses bounded pooled connections and supports the tested MySQL 8.4 authentication. CI starts isolated synthetic database and application servers, verifies backend and browser journeys, then exports commit-identified screenshots. Original templates remain in views/legacy and Git history.",
+    "result": "Backend/rule regressions, an isolated MySQL 8.4 catalog check and complete browser journeys are required before release. Tests cover simultaneous confirmation identity, review expiry, strict numeric inputs, exact-cent totals, date changes, restored sessions, stale stored prices, reload/reset and mobile layout. The linked run identifies the exact tested revision.",
+    "limits": "The hotel, rooms, prices and guest records are synthetic. Public Pages runs only the shared browser demonstration; it does not run Express or MySQL. Stock is illustrative per room type, not a date-based hotel inventory or a held allocation. Confirmations create no real reservation, payment, account or message. Review/receipt state is temporary; the bounded Express cache and local session store are educational rather than a production booking database.",
+    "technical": "One shared JavaScript rules module serves Express and the static frontend. Rates use positive integer cents within the existing DECIMAL(10,2) catalog range; counts reject coercion and ambiguous numeric syntax. Reviews have a shared 15-minute lifetime. A bounded temporary token-keyed receipt cache keeps concurrent Express retries consistent; browser confirmation reuses the same reviewed receipt. Recovery refreshes session/catalog and review, preserving sample guest details while requiring a new explicit confirmation. CSRF and safe catalog errors remain enforced.",
     "run": "Run npm ci, npm test and npm start for Express at http://127.0.0.1:3000. No database is needed by default. npm run build:demo generates the public static version. An optional isolated MySQL Docker setup and opt-in integration test are documented separately.",
     "extra": "",
     "demo": "https://benjanning.github.io/cork-city-hotel/",
     "gallery": [
       [
         "rooms.jpg",
-        "Three synthetic room types with quantity and capacity rules."
+        "Synthetic room cards, capacity and quantity remain clearly explained."
       ],
       [
-        "guest-form.jpg",
-        "Sample guest details and the calculated €720 example total."
+        "refreshed-review.jpg",
+        "Actual Express recovery after its browser session cookies were cleared: sample details are retained and a second confirmation is required."
       ],
       [
         "review.jpg",
-        "A clear review before confirming a demonstration."
+        "Exact room × nights × quantity pricing before explicit confirmation."
       ],
       [
         "confirmation.jpg",
-        "Completed example journey; no real booking or payment."
+        "A genuine demonstration receipt, preserved when the same reviewed quote is confirmed again."
       ]
-    ]
+    ],
+    "challenge": "A booking review can outlive its session or price, and two simultaneous requests can otherwise create different confirmation references. The workflow separates a reviewed quote from its immutable receipt: stale reviews are rebuilt for explicit approval, while retries for the same review preserve identity. Date changes invalidate downstream selections and retain reusable guest details."
   },
   "assets": [
     {
@@ -83,6 +84,11 @@
       "name": "mobile-homepage.jpg",
       "path": "verification/screenshots/mobile-homepage.jpg",
       "provenance": "Actual shared-frontend static browser capture after successful Express/static journey, validation, reload, reset and mobile checks. Future dates calculated at capture time; synthetic records; licensed illustrative photograph credited in public/credits.html."
+    },
+    {
+      "name": "refreshed-review.jpg",
+      "path": "verification/screenshots/refreshed-review.jpg",
+      "provenance": "Actual Express browser capture after clearing its isolated test session cookies and attempting confirmation. The application restores a genuine review with preserved sample guest details and requires a second explicit confirmation; no real booking or payment."
     }
   ]
 }

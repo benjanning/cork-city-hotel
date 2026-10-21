@@ -42,6 +42,31 @@
     },
   ];
   const today = () => new Date().toISOString().slice(0, 10);
+  const reviewLifetime = 15 * 60 * 1000;
+  function integer(value, label, maximum) {
+    if (
+      (typeof value !== "number" && typeof value !== "string") ||
+      !/^[1-9][0-9]*$/.test(String(value)) ||
+      !Number.isSafeInteger(Number(value)) ||
+      Number(value) > maximum
+    )
+      throw Error("Choose a valid " + label + ".");
+    return Number(value);
+  }
+  function priceCents(value) {
+    if (
+      (typeof value !== "number" && typeof value !== "string") ||
+      !/^[0-9]+(?:\.[0-9]{1,2})?$/.test(String(value))
+    )
+      throw Error(
+        "The example rate must be a positive amount with at most two decimal places.",
+      );
+    const [whole, fraction = ""] = String(value).split(".");
+    const cents = Number(whole) * 100 + Number(fraction.padEnd(2, "0"));
+    if (!Number.isSafeInteger(cents) || cents <= 0 || cents > 9999999999)
+      throw Error("The example rate is outside the supported range.");
+    return cents;
+  }
   function date(value) {
     if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value))
       throw Error("Choose valid check-in and check-out dates.");
@@ -58,18 +83,16 @@
       );
     return nights;
   }
+  function quoteCents(price, quantity, nights) {
+    quantity = integer(quantity, "room quantity", 10);
+    nights = integer(nights, "number of nights", 365);
+    const total = priceCents(price) * quantity * nights;
+    if (!Number.isSafeInteger(total))
+      throw Error("The example total is outside the supported range.");
+    return total;
+  }
   function quote(price, quantity, nights) {
-    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10)
-      throw Error("Choose between 1 and 10 rooms.");
-    if (
-      !Number.isInteger(nights) ||
-      nights < 1 ||
-      nights > 365 ||
-      !Number.isFinite(Number(price)) ||
-      Number(price) <= 0
-    )
-      throw Error("The price or stay is invalid.");
-    return (Math.round(Number(price) * 100) * quantity * nights) / 100;
+    return quoteCents(price, quantity, nights) / 100;
   }
   function validateStay(stay, currentDate = today()) {
     if (!stay || typeof stay !== "object")
@@ -77,17 +100,16 @@
     const nights = calculateNights(stay.checkin, stay.checkout);
     if (date(stay.checkin) < date(currentDate))
       throw Error("Check-in cannot be in the past.");
-    const guests = Number(stay.guests);
-    if (!Number.isInteger(guests) || guests < 1 || guests > 6)
-      throw Error("Choose between 1 and 6 guests.");
+    const guests = integer(stay.guests, "guest count", 6);
     return { checkin: stay.checkin, checkout: stay.checkout, guests, nights };
   }
   function makeQuote(rooms, selection, currentDate = today()) {
     const stay = validateStay(selection, currentDate);
-    const room = rooms.find((r) => r.id === Number(selection.roomId));
+    const roomId = integer(selection.roomId, "room type", 2147483647);
+    const room = rooms.find((r) => r.id === roomId);
     if (!room) throw Error("Choose an available example room.");
-    const quantity = Number(selection.quantity);
-    const total = quote(room.price, quantity, stay.nights);
+    const quantity = integer(selection.quantity, "room quantity", 10);
+    const total = quoteCents(room.price, quantity, stay.nights);
     if (quantity > room.stock)
       throw Error("That quantity exceeds the example availability.");
     if (stay.guests > room.capacity * quantity)
@@ -97,8 +119,8 @@
       roomId: room.id,
       roomName: room.name,
       quantity,
-      unitPriceCents: Math.round(Number(room.price) * 100),
-      totalCents: Math.round(total * 100),
+      unitPriceCents: priceCents(room.price),
+      totalCents: total,
     };
   }
   function validateGuest(guest) {
@@ -128,8 +150,10 @@
   return {
     catalog,
     today,
+    reviewLifetime,
     calculateNights,
     quote,
+    priceCents,
     validateStay,
     makeQuote,
     validateGuest,

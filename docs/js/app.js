@@ -7,6 +7,7 @@
   let state = {},
     rooms = [],
     csrf = "";
+  let reviewNotice = "";
   try {
     state = JSON.parse(sessionStorage.getItem(key) || "{}");
   } catch {
@@ -68,8 +69,89 @@
     } catch {
       throw Error("The demo server is unavailable. Reload and try again.");
     }
-    if (!response.ok) throw Error(data.error || "Please try again.");
+    if (!response.ok) {
+      const failure = Error(data.error || "Please try again.");
+      failure.code = data.code;
+      throw failure;
+    }
     return data;
+  }
+  async function handleFailure(failure) {
+    const recoverable = [
+      "session_expired",
+      "review_required",
+      "review_expired",
+      "price_changed",
+    ];
+    if (recoverable.includes(failure.code)) {
+      try {
+        if (server) {
+          const fresh = await api("session");
+          csrf = fresh.csrf;
+          rooms = (await api("rooms")).rooms;
+        }
+        if (!state.quote || !state.guest)
+          throw Error(
+            "Choose your stay again. Your sample guest details are preserved.",
+          );
+        const guest = R.validateGuest(state.guest);
+        state.preview = server
+          ? await api("preview", { ...state.quote, guest })
+          : {
+              quote: R.makeQuote(rooms, state.quote),
+              guest,
+              token: crypto.randomUUID(),
+              expiresAt: Date.now() + R.reviewLifetime,
+            };
+        state.quote = state.preview.quote;
+        delete state.receipt;
+        reviewNotice =
+          "Your review has been refreshed. Check the dates, room and current total, then confirm again.";
+        go("review");
+        return;
+      } catch (recoveryError) {
+        delete state.preview;
+        delete state.receipt;
+        reviewNotice = recoveryError.message;
+        go("stay");
+        return;
+      }
+    }
+    if (failure.code === "selection_invalid") {
+      delete state.preview;
+      delete state.receipt;
+      reviewNotice = failure.message;
+      go("stay");
+      return;
+    }
+    error(failure.message);
+  }
+  function staticReceipt() {
+    if (state.receipt?.token === state.preview.token) return state.receipt;
+    if (!state.preview.expiresAt || state.preview.expiresAt <= Date.now()) {
+      const expired = Error(
+        "This review expired. Refresh it and check the details again.",
+      );
+      expired.code = "review_expired";
+      throw expired;
+    }
+    const quote = R.makeQuote(rooms, state.preview.quote);
+    if (
+      quote.totalCents !== state.preview.quote.totalCents ||
+      quote.unitPriceCents !== state.preview.quote.unitPriceCents
+    ) {
+      const changed = Error(
+        "The example price changed. Review your stay again.",
+      );
+      changed.code = "price_changed";
+      throw changed;
+    }
+    return {
+      ...state.preview,
+      quote,
+      reference: "DEMO-" + crypto.randomUUID().slice(0, 8).toUpperCase(),
+      demo: true,
+    };
   }
   const errors = () =>
     '<div id="error" class="error" role="alert" tabindex="-1" hidden></div>';
@@ -91,7 +173,7 @@
   }
   function summary(q = state.quote) {
     if (!q) return "";
-    return `<aside class="summary"><span class="eyebrow">YOUR EXAMPLE STAY</span><h2>A little time away.</h2><div class="summary-dates"><div><small>CHECK-IN</small><strong>${esc(date(q.checkin))}</strong></div><span>→</span><div><small>CHECK-OUT</small><strong>${esc(date(q.checkout))}</strong></div></div><dl><div><dt>Room</dt><dd>${esc(q.roomName)}</dd></div><div><dt>Rooms · guests</dt><dd>${q.quantity} · ${q.guests}</dd></div><div><dt>${money(q.unitPriceCents)} × ${q.nights} nights × ${q.quantity} rooms</dt><dd>${money(q.totalCents)}</dd></div></dl><div class="summary-total"><span>Example total</span><strong>${money(q.totalCents)}</strong></div><p class="fine">Synthetic rate. No payment is collected.<br>No reservation or real availability is implied.</p></aside>`;
+    return `<aside class="summary"><span class="eyebrow">YOUR EXAMPLE STAY</span><h2>A little time away.</h2><div class="summary-dates"><div><small>CHECK-IN</small><strong>${esc(date(q.checkin))}</strong></div><span>→</span><div><small>CHECK-OUT</small><strong>${esc(date(q.checkout))}</strong></div></div><a class="summary-edit" href="#stay">Change dates ↗</a><dl><div><dt>Room</dt><dd>${esc(q.roomName)}</dd></div><div><dt>Rooms · guests</dt><dd>${q.quantity} · ${q.guests}</dd></div><div><dt>${money(q.unitPriceCents)} × ${q.nights} nights × ${q.quantity} rooms</dt><dd>${money(q.totalCents)}</dd></div></dl><div class="summary-total"><span>Example total</span><strong>${money(q.totalCents)}</strong></div><p class="fine">Synthetic rate. No payment is collected.<br>No reservation or real availability is implied.</p></aside>`;
   }
   function hero() {
     app.innerHTML = `${errors()}<section class="hotel-hero"><div class="hero-copy"><span class="eyebrow">A FICTIONAL RETREAT IN THE HEART OF CORK</span><h1>Come for the city.<br><em>Stay for a moment.</em></h1><p>A considered space to slow down. Explore three example rooms and a thoughtful, fully interactive booking journey.</p><a class="underlink" href="#stay">Make yourself at home <span>↗</span></a><div class="hero-details"><span>Three room types</span><span>One simple journey</span><span>Entirely a demonstration</span></div></div><figure class="hero-photo"><img src="./images/hotel-room.jpg" alt="Illustrative hotel bedroom with a warm wooden interior" width="1600" height="1068"><figcaption>Illustrative room photography · Not a real property</figcaption></figure></section><section class="booking-bar" aria-label="Plan your example stay"><span class="eyebrow">YOUR NEXT CHAPTER STARTS HERE</span>${datesForm()}</section><section class="home-bottom"><div><span class="eyebrow">CONSIDERED, FROM START TO FINISH</span><h2>A room for your<br>kind of stay.</h2></div><p>Choose your dates, explore the example rooms and see the full price before confirming a demonstration. No account. No payment. Just a useful way to explore the application.</p><a href="#stay" class="underlink">Explore the rooms →</a></section>`;
@@ -146,9 +228,15 @@
       error(e.message);
       guarded = true;
     }
+    if (reviewNotice) {
+      error(reviewNotice);
+      reviewNotice = "";
+      guarded = true;
+    }
     document.title =
       "Cork City Hotel — " + (location.hash.slice(1) || "A considered stay");
-    if (!guarded) document.querySelector("#main").focus({ preventScroll: true });
+    if (!guarded)
+      document.querySelector("#main").focus({ preventScroll: true });
     window.scrollTo({ top: 0, behavior: "instant" });
   }
   app.addEventListener("submit", async (event) => {
@@ -175,14 +263,16 @@
                 quote: R.makeQuote(rooms, payload),
                 guest,
                 token: crypto.randomUUID(),
+                expiresAt: Date.now() + R.reviewLifetime,
               };
+          state.quote = state.preview.quote;
           go("review");
         } finally {
           submit.disabled = false;
         }
       }
     } catch (e) {
-      error(e.message);
+      await handleFailure(e);
     }
   });
   app.addEventListener("change", (e) => {
@@ -212,12 +302,7 @@
         try {
           state.receipt = server
             ? await api("confirm", { token: state.preview.token })
-            : {
-                ...state.preview,
-                reference:
-                  "DEMO-" + crypto.randomUUID().slice(0, 8).toUpperCase(),
-                demo: true,
-              };
+            : staticReceipt();
           go("confirmation");
         } finally {
           button.disabled = false;
@@ -229,7 +314,7 @@
         go("home");
       }
     } catch (errorValue) {
-      error(errorValue.message);
+      await handleFailure(errorValue);
     }
   });
   document.querySelector(".skip").addEventListener("click", (event) => {
