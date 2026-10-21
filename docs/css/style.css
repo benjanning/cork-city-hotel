@@ -1013,3 +1013,5 @@ label {
     transform: translateY(-1px);
   }
 }
+
+.summary-edit{display:inline-block;margin:12px 0 18px;color:#31543f;font-size:12px;text-underline-offset:4px}

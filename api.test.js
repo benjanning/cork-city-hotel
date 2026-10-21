@@ -2,11 +2,12 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { createApp } = require("./server");
 const R = require("./booking");
-async function client(repository) {
-  const server = createApp({ repository, clock: () => "2026-10-19" }).listen(
-    0,
-    "127.0.0.1",
-  );
+async function client(repository, settings = {}) {
+  const server = createApp({
+    repository,
+    clock: () => "2026-10-19",
+    ...settings,
+  }).listen(0, "127.0.0.1");
   await new Promise((r) => server.once("listening", r));
   const base = "http://127.0.0.1:" + server.address().port;
   let cookie = "",
@@ -29,11 +30,15 @@ async function client(repository) {
   }
   const session = await request("session");
   csrf = session.data.csrf;
-  return { request, close: () => new Promise((r) => {
-    server.close(r);
-    // Test clients are finished; close fetch keep-alive sockets deterministically.
-    server.closeAllConnections();
-  }) };
+  return {
+    request,
+    close: () =>
+      new Promise((r) => {
+        server.close(r);
+        // Test clients are finished; close fetch keep-alive sockets deterministically.
+        server.closeAllConnections();
+      }),
+  };
 }
 const selection = {
   checkin: "2026-11-10",
@@ -159,6 +164,100 @@ test("security headers and a catalog independent of client input", async () => {
     assert.equal(res.data.rooms.length, 3);
     assert.equal(res.headers.get("x-content-type-options"), "nosniff");
     assert.match(res.headers.get("cache-control"), /no-store/);
+  } finally {
+    await c.close();
+  }
+});
+
+test("simultaneous confirmations share one reviewed receipt", async () => {
+  let blocked = false,
+    arrivals = 0,
+    release;
+  const gate = new Promise((resolve) => (release = resolve));
+  const repository = {
+    mode: "synthetic",
+    list: async () => {
+      if (blocked) {
+        arrivals++;
+        if (arrivals === 2) release();
+        await gate;
+      }
+      return R.catalog;
+    },
+  };
+  const c = await client(repository);
+  try {
+    const preview = await c.request("preview", selection);
+    blocked = true;
+    const replies = await Promise.all([
+      c.request("confirm", { token: preview.data.token }),
+      c.request("confirm", { token: preview.data.token }),
+    ]);
+    assert.equal(replies[0].status, 200);
+    assert.equal(replies[1].status, 200);
+    assert.deepEqual(replies[0].data, replies[1].data);
+  } finally {
+    await c.close();
+  }
+});
+test("expired reviews require a fresh preview and preserve confirmed snapshots", async () => {
+  let timestamp = 1000;
+  let slow = false;
+  const repository = {
+    mode: "synthetic",
+    list: async () => {
+      if (slow) timestamp += R.reviewLifetime;
+      return R.catalog;
+    },
+  };
+  const c = await client(repository, { now: () => timestamp });
+  try {
+    const preview = await c.request("preview", selection);
+    timestamp += 16 * 60 * 1000;
+    const expired = await c.request("confirm", { token: preview.data.token });
+    assert.equal(expired.status, 409);
+    assert.equal(expired.data.code, "review_expired");
+    const delayed = await c.request("preview", selection);
+    slow = true;
+    const late = await c.request("confirm", { token: delayed.data.token });
+    assert.equal(late.status, 409);
+    assert.equal(late.data.code, "review_expired");
+    slow = false;
+    const fresh = await c.request("preview", selection);
+    assert.notEqual(fresh.data.token, preview.data.token);
+    const receipt = await c.request("confirm", { token: fresh.data.token });
+    assert.equal(receipt.status, 200);
+    timestamp += 16 * 60 * 1000;
+    assert.deepEqual(
+      (await c.request("confirm", { token: fresh.data.token })).data,
+      receipt.data,
+    );
+  } finally {
+    await c.close();
+  }
+});
+test("catalog failure and changed stock have different recoverable responses", async () => {
+  let fail = false,
+    stock = 6;
+  const c = await client({
+    mode: "synthetic",
+    list: async () => {
+      if (fail) throw Error("private details");
+      return R.catalog.map((r) => (r.id === 2 ? { ...r, stock } : r));
+    },
+  });
+  try {
+    const p = await c.request("preview", selection);
+    fail = true;
+    const outage = await c.request("confirm", { token: p.data.token });
+    assert.equal(outage.status, 503);
+    assert.equal(outage.data.code, "catalog_unavailable");
+    assert.doesNotMatch(outage.data.error, /private/);
+    fail = false;
+    stock = 1;
+    const changed = await c.request("confirm", { token: p.data.token });
+    assert.equal(changed.status, 409);
+    assert.equal(changed.data.code, "selection_invalid");
   } finally {
     await c.close();
   }

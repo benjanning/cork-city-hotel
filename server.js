@@ -7,8 +7,19 @@ const { createRoomRepository } = require("./room-repository");
 function createApp({
   repository = createRoomRepository(),
   clock = Rules.today,
+  now = Date.now,
 } = {}) {
   const app = express();
+  // One immutable receipt per reviewed token, including overlapping HTTP retries.
+  // Bounded, temporary synthetic state; no actual reservation inventory is held.
+  const confirmations = new Map();
+  const reviewLifetime = Rules.reviewLifetime;
+  function pruneConfirmations() {
+    for (const [key, value] of confirmations)
+      if (value.expiresAt <= now()) confirmations.delete(key);
+    while (confirmations.size > 500)
+      confirmations.delete(confirmations.keys().next().value);
+  }
   app.disable("x-powered-by");
   app.set("view engine", "ejs");
   app.set("views", path.join(__dirname, "views"));
@@ -49,21 +60,19 @@ function createApp({
       actual.length !== expected.length ||
       !timingSafeEqual(actual, expected)
     )
-      return res
-        .status(403)
-        .json({ error: "Your demo session expired. Reload and try again." });
+      return res.status(403).json({
+        error: "Your demo session expired. Restore your review and try again.",
+        code: "session_expired",
+      });
     next();
   });
   app.get("/api/rooms", async (req, res) => {
     try {
       res.json({ rooms: await repository.list(), mode: repository.mode });
     } catch {
-      res
-        .status(503)
-        .json({
-          error:
-            "The room catalog is temporarily unavailable. Please try again.",
-        });
+      res.status(503).json({
+        error: "The room catalog is temporarily unavailable. Please try again.",
+      });
     }
   });
   app.post("/api/preview", async (req, res) => {
@@ -71,20 +80,27 @@ function createApp({
     try {
       rooms = await repository.list();
     } catch {
-      return res
-        .status(503)
-        .json({
-          error:
-            "The room catalog is temporarily unavailable. Please try again.",
-        });
+      return res.status(503).json({
+        error: "The room catalog is temporarily unavailable. Please try again.",
+      });
     }
     try {
       const quote = Rules.makeQuote(rooms, req.body, clock());
       const guest = Rules.validateGuest(req.body.guest);
       const token = randomBytes(16).toString("hex");
-      req.session.preview = { quote, guest, token };
+      req.session.preview = {
+        quote,
+        guest,
+        token,
+        expiresAt: now() + reviewLifetime,
+      };
       delete req.session.receipt;
-      res.json({ quote, guest, token });
+      res.json({
+        quote,
+        guest,
+        token,
+        expiresAt: req.session.preview.expiresAt,
+      });
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
@@ -92,39 +108,68 @@ function createApp({
   app.post("/api/confirm", async (req, res) => {
     const preview = req.session.preview;
     if (!preview || req.body?.token !== preview.token)
-      return res
-        .status(409)
-        .json({
-          error: "Review your stay before confirming the demonstration.",
-        });
+      return res.status(409).json({
+        error: "Review your stay before confirming the demonstration.",
+        code: "review_required",
+      });
     if (req.session.receipt) return res.json(req.session.receipt);
+    pruneConfirmations();
+    if (confirmations.has(preview.token)) {
+      req.session.receipt = confirmations.get(preview.token).receipt;
+      return res.json(req.session.receipt);
+    }
+    if (preview.expiresAt <= now())
+      return res.status(409).json({
+        error: "This review expired. Refresh it and check the details again.",
+        code: "review_expired",
+      });
+    let rooms;
     try {
-      const quote = Rules.makeQuote(
-        await repository.list(),
-        preview.quote,
-        clock(),
-      );
+      rooms = await repository.list();
+    } catch {
+      return res.status(503).json({
+        error:
+          "The room catalog is temporarily unavailable. Your selection is preserved; try again.",
+        code: "catalog_unavailable",
+      });
+    }
+    try {
+      // The catalog read can outlast the review, or another request can finish it.
+      if (confirmations.has(preview.token)) {
+        req.session.receipt = confirmations.get(preview.token).receipt;
+        return res.json(req.session.receipt);
+      }
+      if (preview.expiresAt <= now())
+        return res.status(409).json({
+          error: "This review expired. Refresh it and check the details again.",
+          code: "review_expired",
+        });
+      const quote = Rules.makeQuote(rooms, preview.quote, clock());
       if (quote.totalCents !== preview.quote.totalCents)
-        return res
-          .status(409)
-          .json({
-            error: "The example price changed. Review your stay again.",
-          });
+        return res.status(409).json({
+          error: "The example price changed. Review your stay again.",
+          code: "price_changed",
+        });
       const receipt = {
         reference: "DEMO-" + randomBytes(4).toString("hex").toUpperCase(),
         quote,
         guest: preview.guest,
         demo: true,
+        token: preview.token,
       };
+      confirmations.set(preview.token, {
+        receipt,
+        expiresAt: now() + reviewLifetime,
+      });
+      pruneConfirmations();
       req.session.receipt = receipt;
       res.json(receipt);
     } catch {
-      res
-        .status(503)
-        .json({
-          error:
-            "We could not complete the demonstration. Review your stay and try again.",
-        });
+      res.status(409).json({
+        error:
+          "The selected stay is no longer valid. Review the dates, room and quantity again.",
+        code: "selection_invalid",
+      });
     }
   });
   for (const [route, step] of [
@@ -135,12 +180,9 @@ function createApp({
   ])
     app.get("/" + route, (req, res) => res.redirect("/#" + step));
   app.use((error, req, res, next) =>
-    res
-      .status(error.type === "entity.too.large" ? 413 : 400)
-      .json({
-        error:
-          "The request could not be read. Check your inputs and try again.",
-      }),
+    res.status(error.type === "entity.too.large" ? 413 : 400).json({
+      error: "The request could not be read. Check your inputs and try again.",
+    }),
   );
   app.locals.repository = repository;
   return app;
