@@ -1,6 +1,6 @@
 # Cork City Hotel
 
-A complete demonstration booking journey: choose dates, compare example rooms, enter sample guest details and review an accurate total.
+Compare the full cost of a multi-room stay, correct capacity problems directly, then review and confirm a synthetic booking journey.
 
 ![Verified shared demonstration homepage](https://raw.githubusercontent.com/benjanning/cork-city-hotel/portfolio-published/portfolio/export/assets/homepage.jpg)
 
@@ -10,7 +10,17 @@ A complete demonstration booking journey: choose dates, compare example rooms, e
 
 The public demo is static and runs in your browser. It shares the interface and booking rules with the Express application; it does not run Express or MySQL. Everything uses synthetic data. No actual reservation or payment is made.
 
-## Reliable reviews, not just a happy path
+## Compare the whole stay
+
+Each room card shows the current quantity's full-stay total and its exact nightly × nights × rooms breakdown. Capacity and illustrative stock are assessed by the same pure rule used for the final quote. An unavailable quantity stays disabled with a specific reason; **Use minimum N rooms** explicitly updates all comparisons when the required quantity fits example stock.
+
+For example, six guests over three nights cannot choose one double room. Its current-quantity price is clearly shown as EUR360; explicitly choosing three rooms updates the valid total to EUR1080. These are synthetic quotes, with no claimed reservations or business impact.
+
+Changing room quantity clears the prior quote, review and receipt while retaining dates and reusable sample guest details. Keyboard focus returns to the quantity control with updated comparison context. [Design and checks](ROOM-COMPARISON.md).
+
+![Actual full-stay comparison after explicit quantity repair](https://raw.githubusercontent.com/benjanning/cork-city-hotel/portfolio-published/portfolio/export/assets/quantity-repaired.jpg)
+
+## Reliable reviews
 
 A booking journey needs to preserve the selected stay when its session expires, show the correct price after a date change, and avoid producing different references for the same confirmation.
 
@@ -71,7 +81,7 @@ There is no dependency on Docker to run the default application. No production d
 
 ## Verification and limits
 
-Source CI requires 20 backend/rule checks, a separate disposable MySQL 8.4 integration check and seven complete browser workflows before publishing a release. The default local run skips the opt-in database check. Tests exercise full HTTP preview/confirmation, CSRF, tampered prices, invalid dates/quantities/capacity/guests, idempotency, changed rates and catalog failures. Browser checks cover the complete Express and static journeys on desktop/mobile.
+Source CI requires 23 backend/rule checks, a separate disposable MySQL 8.4 integration check and nine complete browser workflows before publishing a release. The default local run skips the opt-in database check. Tests exercise full HTTP preview/confirmation, CSRF, tampered prices, invalid dates/quantities/capacity/guests, idempotency, changed rates and catalog failures. Browser checks cover the complete Express and static journeys on desktop/mobile.
 
 Academic source evolved into a portfolio demo: original booking templates are preserved in views/legacy/ and Git history. This is not a real hotel, payment system, inventory engine or production authentication service. Use synthetic details only.
 

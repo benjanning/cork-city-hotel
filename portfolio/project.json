@@ -5,49 +5,44 @@
     "title": "Hotel booking prototype",
     "category": "Web application",
     "repo": "cork-city-hotel",
-    "stack": [
-      "Node.js",
-      "Express",
-      "EJS",
-      "MySQL"
-    ],
-    "image": "homepage.jpg",
-    "alt": "Actual hotel demonstration homepage with future date selection and credited illustrative bedroom photography",
-    "desc": "A polished multi-step hotel demonstration with exact pricing, stable confirmation retries and recoverable booking reviews.",
-    "built": "Preserved the established hotel interface and strengthened the shared booking rules and review lifecycle so date changes, expired sessions and repeated confirmations behave predictably.",
-    "why": "A multi-step transaction should carry information reliably from one screen to the next. The project explores session state, validation and pricing across a booking journey.",
+    "stack": ["Node.js", "Express", "EJS", "MySQL"],
+    "image": "quantity-repaired.jpg",
+    "alt": "Verified room comparison for six synthetic guests: full three-night costs and explicit room-quantity recovery",
+    "desc": "Compare full-stay room costs, resolve capacity limits and complete a recoverable demonstration booking.",
+    "built": "Extended the existing Express/static booking journey with full-stay room comparisons and explicit quantity recovery, using the same exact-cent rules that validate the final quotation.",
+    "why": "A nightly price alone hides the cost of a multi-room stay. Guests also need to understand why a room type cannot accommodate their party and how to correct the selection.",
     "how": [
-      "Choose future dates, a room type and quantity; the shared rules calculate an exact integer-cent example total.",
-      "Enter sample guest details and review the quote. Changed or expired reviews are refreshed without losing the selection, and require explicit confirmation again.",
-      "Complete a demonstration confirmation, revisit it safely or edit dates and review a new quotation; no actual room is reserved."
+      "Choose future dates and guest count. Compare the full stay price for each room type, with its nightly rate, nights and room quantity shown.",
+      "Use an explicit minimum-room action to resolve capacity or stock problems; every comparison updates together, while previous quotes and reviews are invalidated.",
+      "Choose a room, enter sample details and review the exact same quotation. Existing session recovery and stable confirmation retries remain available."
     ],
-    "demonstrates": "Server-rendered web development, session handling, input validation and turning a multi-step process into a working application.",
+    "demonstrates": "Shared business rules, exact pricing, accessible recovery from invalid selections and consistent state across a multi-step application.",
     "caption": "Genuine capture of the verified shared interface. The hotel is fictional; photography is illustrative and credited. Browser-only public mode is labelled prominently.",
-    "result": "Backend/rule regressions, an isolated MySQL 8.4 catalog check and complete browser journeys are required before release. Tests cover simultaneous confirmation identity, review expiry, strict numeric inputs, exact-cent totals, date changes, restored sessions, stale stored prices, reload/reset and mobile layout. The linked run identifies the exact tested revision.",
+    "result": "Rule/API regressions, a disposable MySQL 8.4 catalog check and nine Express/static browser journeys gate publication. A six-guest, three-night example moves explicitly from one invalid double room at EUR360 to three valid rooms at EUR1080; these are synthetic quoted amounts, not bookings or business impact. Tests reconcile every room-card total with the later quote, clear stale downstream state after quantity changes, retain sample guest details, and check keyboard/mobile use alongside the existing confirmation recovery paths.",
     "limits": "The hotel, rooms, prices and guest records are synthetic. Public Pages runs only the shared browser demonstration; it does not run Express or MySQL. Stock is illustrative per room type, not a date-based hotel inventory or a held allocation. Confirmations create no real reservation, payment, account or message. Review/receipt state is temporary; the bounded Express cache and local session store are educational rather than a production booking database.",
-    "technical": "One shared JavaScript rules module serves Express and the static frontend. Rates use positive integer cents within the existing DECIMAL(10,2) catalog range; counts reject coercion and ambiguous numeric syntax. Reviews have a shared 15-minute lifetime. A bounded temporary token-keyed receipt cache keeps concurrent Express retries consistent; browser confirmation reuses the same reviewed receipt. Recovery refreshes session/catalog and review, preserving sample guest details while requiring a new explicit confirmation. CSRF and safe catalog errors remain enforced.",
+    "technical": "A shared pure roomOption assessment computes integer-cent totals, capacity, stock eligibility and a bounded minimum-room suggestion. makeQuote delegates to that assessment and retains its original valid quote contract and rejection messages. Both manual and suggested quantity changes clear quote/review/receipt state while retaining dates and sample guest details. The server recalculates from its own catalog. Existing CSRF, 15-minute reviews, bounded token-keyed receipts and explicit stale-review recovery remain in place.",
     "run": "Run npm ci, npm test and npm start for Express at http://127.0.0.1:3000. No database is needed by default. npm run build:demo generates the public static version. An optional isolated MySQL Docker setup and opt-in integration test are documented separately.",
     "extra": "",
     "demo": "https://benjanning.github.io/cork-city-hotel/",
     "gallery": [
       [
-        "rooms.jpg",
-        "Synthetic room cards, capacity and quantity remain clearly explained."
+        "stay-comparison.jpg",
+        "Full-stay totals at the selected quantity, with specific capacity explanations and explicit repair actions."
       ],
       [
-        "refreshed-review.jpg",
-        "Actual Express recovery after its browser session cookies were cleared: sample details are retained and a second confirmation is required."
+        "mobile-stay-comparison.jpg",
+        "The same comparison and quantity recovery on a narrow viewport, with keyboard focus returned to the quantity control."
       ],
       [
         "review.jpg",
-        "Exact room × nights × quantity pricing before explicit confirmation."
+        "The selected full-stay amount carried into the review before explicit confirmation."
       ],
       [
-        "confirmation.jpg",
-        "A genuine demonstration receipt, preserved when the same reviewed quote is confirmed again."
+        "refreshed-review.jpg",
+        "Existing Express session recovery preserves sample details and requires a fresh explicit confirmation."
       ]
     ],
-    "challenge": "A booking review can outlive its session or price, and two simultaneous requests can otherwise create different confirmation references. The workflow separates a reviewed quote from its immutable receipt: stale reviews are rebuilt for explicit approval, while retries for the same review preserve identity. Date changes invalidate downstream selections and retain reusable guest details."
+    "challenge": "Room cards and final quotation previously had separate eligibility calculations, and changing quantity could leave an older review reachable. One shared assessment now drives comparison and authoritative validation; one quantity-change boundary invalidates all downstream state. An invalid current quantity can show a clearly labelled price without enabling booking, and a repair is offered only when the required quantity fits example stock."
   },
   "assets": [
     {
@@ -89,6 +84,21 @@
       "name": "refreshed-review.jpg",
       "path": "verification/screenshots/refreshed-review.jpg",
       "provenance": "Actual Express browser capture after clearing its isolated test session cookies and attempting confirmation. The application restores a genuine review with preserved sample guest details and requires a second explicit confirmation; no real booking or payment."
+    },
+    {
+      "name": "stay-comparison.jpg",
+      "path": "verification/screenshots/stay-comparison.jpg",
+      "provenance": "Actual shared static frontend browser capture from the comparison journey also tested in Express. Six synthetic guests, three nights, current-quantity totals and explicit minimum-room repair; capture dates relative to run. No real inventory, bookings or payments. Mobile image uses a 390px viewport."
+    },
+    {
+      "name": "quantity-repaired.jpg",
+      "path": "verification/screenshots/quantity-repaired.jpg",
+      "provenance": "Actual shared static frontend browser capture from the comparison journey also tested in Express. Six synthetic guests, three nights, current-quantity totals and explicit minimum-room repair; capture dates relative to run. No real inventory, bookings or payments. Mobile image uses a 390px viewport."
+    },
+    {
+      "name": "mobile-stay-comparison.jpg",
+      "path": "verification/screenshots/mobile-stay-comparison.jpg",
+      "provenance": "Actual shared static frontend browser capture from the comparison journey also tested in Express. Six synthetic guests, three nights, current-quantity totals and explicit minimum-room repair; capture dates relative to run. No real inventory, bookings or payments. Mobile image uses a 390px viewport."
     }
   ]
 }

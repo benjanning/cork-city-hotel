@@ -181,18 +181,39 @@
   function stay() {
     app.innerHTML = `<div class="flow">${steps(0)}${errors()}<header class="page-heading"><span class="eyebrow">01 / MAKE A LITTLE SPACE</span><h1>When shall we<br><em>expect you?</em></h1><p>Choose a future stay and your guest count. All availability is synthetic.</p></header><section class="date-panel">${datesForm()}<p class="fine">Choose 1–365 nights. Use the next steps to explore room types, prices and sample guest details.</p></section></div>`;
   }
+  function optionFor(roomId) {
+    return R.roomOption(rooms, {
+      ...state.stay,
+      roomId,
+      quantity: Number(state.quantity || 1),
+    });
+  }
+  function changeQuantity(quantity) {
+    state.quantity = quantity;
+    delete state.quote;
+    delete state.preview;
+    delete state.receipt;
+    save();
+    selectRoom();
+    document.querySelector("#quantity").focus();
+  }
   function roomCards() {
     return rooms
       .map((room) => {
-        const qty = Number(state.quantity || 1),
-          fits = room.capacity * qty >= state.stay.guests && qty <= room.stock;
-        return `<article class="room-card"><div class="room-art art-${room.kind.toLowerCase()}" aria-hidden="true"><div class="floorplan"><i></i>${room.kind === "Single" ? "" : "<i></i>"}</div><span>${room.size} m² / ILLUSTRATIVE LAYOUT</span></div><div class="room-card-body"><div class="room-meta">${esc(room.kind)} room <span>${room.capacity} ${room.capacity === 1 ? "guest" : "guests"} per room</span></div><h2>${esc(room.name)}</h2><p>${esc(room.description)}</p><ul>${room.features.map((f) => `<li>${esc(f)}</li>`).join("")}</ul><div class="room-price"><strong>${money(Math.round(room.price * 100))}<small>/ room / night</small></strong><span>${room.stock} example rooms</span></div><button class="button" data-room="${room.id}" ${fits ? "" : "disabled"}>${fits ? "Choose this room" : "Adjust room quantity"} <span aria-hidden="true">→</span></button>${!fits ? '<p class="fine">Select enough rooms for your guest count and stay within example stock.</p>' : ""}</div></article>`;
+        const option = optionFor(room.id),
+          q = option.quote;
+        const explanation = option.eligible
+          ? `Fits ${q.guests} guests in ${q.quantity} ${q.quantity === 1 ? "room" : "rooms"}.`
+          : q.quantity > option.stock
+            ? `Only ${option.stock} example rooms of this type. You selected ${q.quantity}.`
+            : `${q.quantity} ${q.quantity === 1 ? "room holds" : "rooms hold"} ${option.capacity * q.quantity}; your stay has ${q.guests} guests.`;
+        return `<article class="room-card" aria-labelledby="room-name-${room.id}"><div class="room-art art-${room.kind.toLowerCase()}" aria-hidden="true"><div class="floorplan"><i></i>${room.kind === "Single" ? "" : "<i></i>"}</div><span>${room.size} m² / ILLUSTRATIVE LAYOUT</span></div><div class="room-card-body"><div class="room-meta">${esc(room.kind)} room <span>${option.capacity} ${option.capacity === 1 ? "guest" : "guests"} per room</span></div><h2 id="room-name-${room.id}">${esc(room.name)}</h2><p>${esc(room.description)}</p><ul>${room.features.map((f) => `<li>${esc(f)}</li>`).join("")}</ul><div class="stay-price"><span>FULL STAY · ${q.quantity} ${q.quantity === 1 ? "ROOM" : "ROOMS"}</span><strong>${money(q.totalCents)}</strong><small>${money(q.unitPriceCents)} / room / night × ${q.nights} nights × ${q.quantity} rooms</small></div><p class="room-fit" id="room-fit-${room.id}">${esc(explanation)}${option.eligible ? "" : " This quantity cannot be booked."}</p><button class="button" data-room="${room.id}" aria-label="Choose ${esc(room.name)}" aria-describedby="room-fit-${room.id}" ${option.eligible ? "" : "disabled"}>Choose this room <span aria-hidden="true">→</span></button>${option.suggestedQuantity !== null ? `<button class="quantity-repair" data-quantity-room="${room.id}" aria-label="Use minimum ${option.suggestedQuantity} rooms for ${esc(room.name)}">Use minimum ${option.suggestedQuantity} rooms →</button>` : ""}</div></article>`;
       })
       .join("");
   }
   function selectRoom() {
     R.validateStay(state.stay);
-    app.innerHTML = `<div class="flow wide">${steps(1)}${errors()}<div class="heading-row"><header class="page-heading"><span class="eyebrow">02 / FIND YOUR FAVOURITE</span><h1>A room to<br><em>call your own.</em></h1><p>${date(state.stay.checkin)} — ${date(state.stay.checkout)} · ${state.stay.nights} nights · ${state.stay.guests} guests <a href="#stay">Edit dates</a></p></header><div class="quantity-control"><label for="quantity">Number of rooms</label><select id="quantity">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => `<option ${Number(state.quantity || 1) === n ? "selected" : ""}>${n}</option>`).join("")}</select><small>Example availability only</small></div></div><div class="room-grid">${roomCards()}</div></div>`;
+    app.innerHTML = `<div class="flow wide">${steps(1)}${errors()}<div class="heading-row"><header class="page-heading"><span class="eyebrow">02 / FIND YOUR FAVOURITE</span><h1>A room to<br><em>call your own.</em></h1><p>${date(state.stay.checkin)} — ${date(state.stay.checkout)} · ${state.stay.nights} nights · ${state.stay.guests} guests <a href="#stay">Edit dates</a></p></header><div class="quantity-control"><label for="quantity">Number of rooms</label><select id="quantity" aria-describedby="comparison-context">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => `<option ${Number(state.quantity || 1) === n ? "selected" : ""}>${n}</option>`).join("")}</select><small>Example availability only</small></div></div><p class="comparison-context" id="comparison-context">Comparing full-stay totals for ${Number(state.quantity || 1)} rooms and ${state.stay.guests} guests. Changing quantity updates every room type. Rates and stock are synthetic; no rooms are held.</p><div class="room-grid">${roomCards()}</div></div>`;
   }
   function guest() {
     if (!state.quote) throw Error("Choose your room first.");
@@ -277,15 +298,18 @@
   });
   app.addEventListener("change", (e) => {
     if (e.target.id === "quantity") {
-      state.quantity = Number(e.target.value);
-      save();
-      selectRoom();
-      document.querySelector("#quantity").focus();
+      changeQuantity(Number(e.target.value));
     }
   });
   app.addEventListener("click", async (e) => {
     const choose = e.target.closest("[data-room]");
     try {
+      const repair = e.target.closest("[data-quantity-room]");
+      if (repair) {
+        const option = optionFor(Number(repair.dataset.quantityRoom));
+        if (option.suggestedQuantity !== null)
+          changeQuantity(option.suggestedQuantity);
+      }
       if (choose) {
         state.quote = R.makeQuote(rooms, {
           ...state.stay,
