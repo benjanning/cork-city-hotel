@@ -130,3 +130,83 @@ test("counts reject booleans, exponent strings and ambiguous integer syntax", ()
     72000,
   );
 });
+const s = {
+  checkin: "2030-01-01",
+  checkout: "2030-01-04",
+  guests: 6,
+  quantity: 1,
+  roomId: 2,
+};
+test("comparison gives exact current-quantity amounts without accepting an invalid booking", () => {
+  const before = JSON.stringify(R.catalog);
+  const o = R.roomOption(R.catalog, s, "2030-01-01");
+  assert.equal(o.quote.totalCents, 36000);
+  assert.equal(o.quote.unitPriceCents, 12000);
+  assert.equal(o.eligible, false);
+  assert.equal(o.minimumQuantity, 3);
+  assert.equal(o.suggestedQuantity, 3);
+  assert.throws(() => R.makeQuote(R.catalog, s, "2030-01-01"), /enough rooms/);
+  const q = R.makeQuote(R.catalog, { ...s, quantity: 3 }, "2030-01-01");
+  assert.equal(q.totalCents, 108000);
+  assert.equal(q.guests, 6);
+  assert.equal(q.nights, 3);
+  assert.deepEqual(
+    Object.keys(q).sort(),
+    [
+      "checkin",
+      "checkout",
+      "guests",
+      "nights",
+      "quantity",
+      "roomId",
+      "roomName",
+      "totalCents",
+      "unitPriceCents",
+    ].sort(),
+  );
+  assert.equal(JSON.stringify(R.catalog), before);
+});
+test("repair respects zero stock, insufficient stock, excessive quantity and exact decimal rates", () => {
+  for (const stock of [0, "0", 2]) {
+    const rooms = R.catalog.map((r) => ({ ...r, stock }));
+    const o = R.roomOption(rooms, s, "2030-01-01");
+    assert.equal(o.eligible, false);
+    assert.equal(o.suggestedQuantity, null);
+    assert.throws(() => R.makeQuote(rooms, s, "2030-01-01"));
+  }
+  const o = R.roomOption(R.catalog, { ...s, quantity: 7 }, "2030-01-01");
+  assert.match(o.reason, /availability/);
+  assert.equal(o.suggestedQuantity, 3);
+  const rooms = R.catalog.map((r) => ({ ...r, price: "99.99" }));
+  assert.equal(
+    R.makeQuote(rooms, { ...s, quantity: 3 }, "2030-01-01").totalCents,
+    89991,
+  );
+});
+test("comparison and quotation reject malformed catalog counts instead of coercing them", () => {
+  for (const key of ["capacity", "stock"])
+    for (const value of [
+      true,
+      false,
+      null,
+      [],
+      {},
+      "01",
+      "1e0",
+      " 1",
+      1.5,
+      -1,
+      2147483648,
+    ]) {
+      const rooms = R.catalog.map((r) => ({ ...r, [key]: value }));
+      assert.throws(() => R.roomOption(rooms, s, "2030-01-01"));
+      assert.throws(() => R.makeQuote(rooms, s, "2030-01-01"));
+    }
+  assert.throws(() =>
+    R.roomOption(
+      R.catalog.map((r) => ({ ...r, capacity: 0 })),
+      s,
+      "2030-01-01",
+    ),
+  );
+});

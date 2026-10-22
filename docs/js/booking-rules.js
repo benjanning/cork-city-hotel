@@ -103,25 +103,49 @@
     const guests = integer(stay.guests, "guest count", 6);
     return { checkin: stay.checkin, checkout: stay.checkout, guests, nights };
   }
-  function makeQuote(rooms, selection, currentDate = today()) {
+  function roomOption(rooms, selection, currentDate = today()) {
     const stay = validateStay(selection, currentDate);
     const roomId = integer(selection.roomId, "room type", 2147483647);
     const room = rooms.find((r) => r.id === roomId);
     if (!room) throw Error("Choose an available example room.");
     const quantity = integer(selection.quantity, "room quantity", 10);
+    const capacity = integer(room.capacity, "room capacity", 2147483647);
+    const stock =
+      room.stock === 0 || room.stock === "0"
+        ? 0
+        : integer(room.stock, "example stock", 2147483647);
     const total = quoteCents(room.price, quantity, stay.nights);
-    if (quantity > room.stock)
-      throw Error("That quantity exceeds the example availability.");
-    if (stay.guests > room.capacity * quantity)
-      throw Error("Choose enough rooms for your guests.");
+    const minimumQuantity = Math.ceil(stay.guests / capacity);
+    const reason =
+      quantity > stock
+        ? "That quantity exceeds the example availability."
+        : quantity < minimumQuantity
+          ? "Choose enough rooms for your guests."
+          : "";
     return {
-      ...stay,
-      roomId: room.id,
-      roomName: room.name,
-      quantity,
-      unitPriceCents: priceCents(room.price),
-      totalCents: total,
+      quote: {
+        ...stay,
+        roomId: room.id,
+        roomName: room.name,
+        quantity,
+        unitPriceCents: priceCents(room.price),
+        totalCents: total,
+      },
+      eligible: !reason,
+      reason,
+      capacity,
+      stock,
+      minimumQuantity,
+      suggestedQuantity:
+        reason && minimumQuantity <= Math.min(stock, 10)
+          ? minimumQuantity
+          : null,
     };
+  }
+  function makeQuote(rooms, selection, currentDate = today()) {
+    const option = roomOption(rooms, selection, currentDate);
+    if (!option.eligible) throw Error(option.reason);
+    return option.quote;
   }
   function validateGuest(guest) {
     if (
@@ -155,6 +179,7 @@
     quote,
     priceCents,
     validateStay,
+    roomOption,
     makeQuote,
     validateGuest,
   };

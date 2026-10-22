@@ -1014,4 +1014,60 @@ label {
   }
 }
 
-.summary-edit{display:inline-block;margin:12px 0 18px;color:#31543f;font-size:12px;text-underline-offset:4px}
+.summary-edit {
+  display: inline-block;
+  margin: 12px 0 18px;
+  color: #31543f;
+  font-size: 12px;
+  text-underline-offset: 4px;
+}
+
+.comparison-context {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+  margin: -12px 0 24px;
+  max-width: 80ch;
+}
+.stay-price {
+  border-top: 1px solid #d9dece;
+  padding-top: 18px;
+  display: grid;
+  gap: 6px;
+}
+.stay-price > span {
+  font-size: 9px;
+  letter-spacing: 0.09em;
+  color: var(--accent);
+}
+.stay-price strong {
+  font-size: 32px;
+  font-weight: 400;
+}
+.stay-price small {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.room-card .room-fit {
+  min-height: 60px;
+  margin: 14px 0;
+  line-height: 1.7;
+}
+.quantity-repair {
+  color: #31543f;
+  background: transparent;
+  border: 0;
+  padding: 14px 0 4px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+@media (max-width: 700px) {
+  .room-card .room-fit {
+    min-height: 0;
+  }
+}
