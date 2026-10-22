@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "source_repository": "benjanning/cork-city-hotel",
-  "source_revision": "3318e95440b8340c8383f17ff30c0fd5578ebcf7",
-  "verification_run": 39786667394,
+  "source_revision": "6dbd749eecc8a44d2d29a7e0ae3a26326653ccd6",
+  "verification_run": 39844728165,
   "project": {
     "slug": "hotel-booking",
     "title": "Hotel booking prototype",
@@ -79,14 +79,14 @@
     },
     {
       "name": "confirmation.jpg",
-      "sha256": "f8c01862badb4f8665302ed8a25979a134f85fc993e413c9188275c863c0764b",
-      "bytes": 87199,
+      "sha256": "473e5f60a6ddfb24e1876cdf5b30741d100f40bc6eaa9b56f5c076edb4eb6bec",
+      "bytes": 87176,
       "provenance": "Actual shared-frontend static browser capture after successful Express/static journey, validation, reload, reset and mobile checks. Future dates calculated at capture time; synthetic records; licensed illustrative photograph credited in public/credits.html."
     },
     {
       "name": "mobile-confirmation.jpg",
-      "sha256": "8a9dcf1a0e8acb4521981625a22443ae6db9c962033f594f1c0d68ffebe9ab79",
-      "bytes": 66870,
+      "sha256": "12c42fd4ba3f994246dc35fa2e1ccd18fb18c47abb59a885794d38db320ca370",
+      "bytes": 66815,
       "provenance": "Actual shared-frontend static browser capture after successful Express/static journey, validation, reload, reset and mobile checks. Future dates calculated at capture time; synthetic records; licensed illustrative photograph credited in public/credits.html."
     },
     {
@@ -103,8 +103,8 @@
     },
     {
       "name": "stay-comparison.jpg",
-      "sha256": "0fa5ad95df85aa58bfe8c6bc2970e9fe1c6ab9f2ee2e1129c7b76eca88358590",
-      "bytes": 133384,
+      "sha256": "2824af291566397bfa7f8e23f92ad7e55465bb9df6e65e8f6b74556dc222801f",
+      "bytes": 133222,
       "provenance": "Actual shared static frontend browser capture from the comparison journey also tested in Express. Six synthetic guests, three nights, current-quantity totals and explicit minimum-room repair; capture dates relative to run. No real inventory, bookings or payments. Mobile image uses a 390px viewport."
     },
     {
