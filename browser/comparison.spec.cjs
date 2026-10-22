@@ -109,5 +109,32 @@ for (const [mode, url] of modes)
       ),
     ).toBe(true);
     await shot("mobile-stay-comparison");
+    await page.goto(url + "/#stay");
+    await page.getByLabel("Check-in", { exact: true }).fill(day(30));
+    await page.getByLabel("Check-out", { exact: true }).fill(day(31));
+    await page.getByLabel("Guests", { exact: true }).selectOption("1");
+    await page.getByRole("button", { name: "Find your room" }).click();
+    await page.getByLabel("Number of rooms").selectOption("1");
+    await expect(page.locator("#comparison-context")).toContainText(
+      "for 1 room and 1 guest",
+    );
+    await expect(page.locator(".page-heading")).toContainText(
+      "1 night · 1 guest",
+    );
+    await expect(page.locator(".stay-price small").first()).toContainText(
+      "1 night × 1 room",
+    );
+    await page.getByLabel("Number of rooms").selectOption("7");
+    await page
+      .getByRole("button", {
+        name: "Use minimum 1 room for The Courtyard Double",
+        exact: true,
+      })
+      .click();
+    await expect(page.getByLabel("Number of rooms")).toHaveValue("1");
+    await page.locator('[data-room="2"]').click();
+    await expect(page.locator(".summary dl")).toContainText(
+      "€120.00 × 1 night × 1 room",
+    );
     expect(errors).toEqual([]);
   });
